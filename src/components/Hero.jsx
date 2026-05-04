@@ -66,7 +66,7 @@ export default function Hero() {
       <div style={{
         position:"absolute", inset:0, zIndex:0,
         backgroundImage:`url(${FALLBACK_BG})`,
-        backgroundSize:"cover", backgroundPosition:"center center",
+        backgroundSize:"cover", backgroundPosition:"center 30%",
         opacity: videoReady ? 0 : 1,
         transition:"opacity 2s ease",
         pointerEvents:"none",
