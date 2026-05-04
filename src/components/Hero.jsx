@@ -89,7 +89,7 @@ export default function Hero() {
 
       {/* Content */}
       <div style={{ position:"relative", zIndex:4, textAlign:"center", padding:"0 1.5rem", width:"100%" }}>
-        <h1 style={{ fontFamily:"'Cinzel Decorative', serif", fontSize:"clamp(1.6rem, 9vw, 8rem)", fontWeight:900, letterSpacing:"0.12em", color:"#fff", margin:0, lineHeight:1, whiteSpace:"nowrap", display:"flex", justifyContent:"center", textShadow:"0 0 60px rgba(204,0,0,0.5), 0 0 20px rgba(204,0,0,0.3), 0 2px 8px rgba(0,0,0,0.9)" }}>
+        <h1 style={{ fontFamily:"'Cinzel Decorative', serif", fontSize:"clamp(1rem, 7.5vw, 8rem)", fontWeight:900, letterSpacing:"0.12em", color:"#fff", margin:0, lineHeight:1, whiteSpace:"nowrap", display:"flex", justifyContent:"center", textShadow:"0 0 60px rgba(204,0,0,0.5), 0 0 20px rgba(204,0,0,0.3), 0 2px 8px rgba(0,0,0,0.9)" }}>
           {title.split("").map((char, i) => (
             <span key={i} ref={(el) => (lettersRef.current[i] = el)} style={{ display:"inline-block", opacity:0 }}>{char}</span>
           ))}
