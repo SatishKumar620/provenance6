@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
 
-const VIDEO_SRC = "/vidssave.com Zenitsu Clips For Editing I Demon Slayer Season 4 Episode 8 720P.mp4";
+const VIDEO_SRC = "/hero-video.mp4";
 const FALLBACK_BG = "/wp15625089-demon-slayer-kimetsu-no-yaiba-the-movie-infinity-castle-wallpapers.jpg";
 
 export default function Hero() {
