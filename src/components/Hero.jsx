@@ -1,102 +1,138 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { gsap } from "gsap";
 
-const VIDEO_SRC = "/hero-video.mp4";
-const FALLBACK_BG = "/castle.jpg";
+const FEST_DATE = new Date("2026-05-14T09:00:00+05:30");
+
+function useCountdown() {
+  const [t, setT] = useState({ d:0, h:0, m:0, s:0 });
+  useEffect(() => {
+    const tick = () => {
+      const diff = FEST_DATE - Date.now();
+      if (diff <= 0) return setT({ d:0, h:0, m:0, s:0 });
+      setT({
+        d: Math.floor(diff / 86400000),
+        h: Math.floor((diff % 86400000) / 3600000),
+        m: Math.floor((diff % 3600000) / 60000),
+        s: Math.floor((diff % 60000) / 1000),
+      });
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return t;
+}
+
+const pad = (n) => String(n).padStart(2, "0");
 
 export default function Hero() {
-  const lettersRef = useRef([]);
-  const overlayRef = useRef(null);
   const videoRef = useRef(null);
   const [videoReady, setVideoReady] = useState(false);
-  const [muted, setMuted] = useState(false);
-
-  useEffect(() => {
-    const letters = lettersRef.current.filter(Boolean);
-    gsap.fromTo(letters, { opacity: 0, y: 60, skewX: -10 }, { opacity: 1, y: 0, skewX: 0, duration: 1.2, ease: "power4.out", stagger: 0.08, delay: 0.5 });
-    gsap.fromTo(overlayRef.current, { opacity: 0.95 }, { opacity: 0.55, duration: 2, ease: "power2.inOut", delay: 0.3 });
-  }, []);
+  const [muted, setMuted] = useState(true);
+  const { d, h, m, s } = useCountdown();
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    video.muted = false;
-    video.play().then(() => {
-      setVideoReady(true);
-      setMuted(false);
-    }).catch(() => {
-      video.muted = true;
-      video.play().then(() => {
-        setVideoReady(true);
-        setMuted(true);
-      }).catch(() => {});
-    });
-    const unlock = () => {
-      if (video.muted) { video.muted = false; setMuted(false); }
-    };
+    video.muted = true;
+    video.play().then(() => { setVideoReady(true); setMuted(true); }).catch(() => {});
+    const unlock = () => { if (video.muted) { video.muted = false; setMuted(false); } };
     window.addEventListener("touchstart", unlock, { once: true });
     window.addEventListener("click", unlock, { once: true });
-    return () => {
-      window.removeEventListener("touchstart", unlock);
-      window.removeEventListener("click", unlock);
-    };
+    return () => { window.removeEventListener("touchstart", unlock); window.removeEventListener("click", unlock); };
   }, []);
 
-  function toggleMute() {
-    const video = videoRef.current;
-    if (!video) return;
-    video.muted = !video.muted;
-    setMuted(video.muted);
-  }
-
-  const title = "PROVENANCE";
+  const toggleMute = () => {
+    const v = videoRef.current; if (!v) return;
+    v.muted = !v.muted; setMuted(v.muted);
+  };
 
   return (
-    <section style={{ position:"relative", width:"100%", height:"100dvh", minHeight:"100vh", overflow:"hidden", background:"#000", display:"flex", alignItems:"center", justifyContent:"center" }}>
+    <section style={{ position:"relative", width:"100%", height:"100dvh", minHeight:"100vh", overflow:"hidden", background:"#050505", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
 
-      <div style={{ position:"absolute", inset:0, zIndex:0, backgroundImage:`url(${FALLBACK_BG})`, backgroundSize:"cover", backgroundPosition:"center 30%", opacity: videoReady ? 0 : 1, transition:"opacity 1.5s ease", pointerEvents:"none" }} />
+      {/* Fallback bg */}
+      <div style={{ position:"absolute", inset:0, zIndex:0, backgroundImage:"url(/castle.jpg)", backgroundSize:"cover", backgroundPosition:"center", opacity: videoReady ? 0 : 1, transition:"opacity 1.5s ease" }} />
 
-      <video ref={videoRef} src={VIDEO_SRC} loop playsInline autoPlay preload="auto"
-        style={{ position:"absolute", zIndex:1, top:"50%", left:"50%", transform:"translate(-50%, -50%)", minWidth:"100%", minHeight:"100%", width:"auto", height:"auto", objectFit:"cover", opacity: videoReady ? 1 : 0, transition:"opacity 1.5s ease", pointerEvents:"none" }}
-      />
+      {/* Video */}
+      <video ref={videoRef} src="/hero-video.mp4" loop playsInline preload="auto"
+        style={{ position:"absolute", inset:0, zIndex:1, width:"100%", height:"100%", objectFit:"cover", opacity: videoReady ? 1 : 0, transition:"opacity 1.5s ease", pointerEvents:"none" }} />
 
-      <div ref={overlayRef} style={{ position:"absolute", inset:0, zIndex:2, pointerEvents:"none", background:"linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(8,0,0,0.35) 50%, rgba(0,0,0,0.85) 100%)" }} />
+      {/* Purple gradient overlay */}
+      <div style={{ position:"absolute", inset:0, zIndex:2, background:"linear-gradient(135deg, rgba(5,5,5,0.85) 0%, rgba(26,10,46,0.7) 50%, rgba(5,5,5,0.9) 100%)", pointerEvents:"none" }} />
 
-      <div style={{ position:"absolute", inset:0, zIndex:3, pointerEvents:"none", opacity:0.05, backgroundImage:`url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundRepeat:"repeat", backgroundSize:"150px" }} />
+      {/* Bottom fade */}
+      <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"30%", zIndex:3, background:"linear-gradient(to top, #050505, transparent)", pointerEvents:"none" }} />
 
-      <div style={{ position:"relative", zIndex:4, textAlign:"center", padding:"0 1.5rem", width:"100%" }}>
-        <h1 style={{ fontFamily:"'Cinzel Decorative', serif", fontSize:"clamp(1rem, 7.5vw, 8rem)", fontWeight:900, letterSpacing:"0.12em", color:"#fff", margin:0, lineHeight:1, whiteSpace:"nowrap", display:"flex", justifyContent:"center", textShadow:"0 0 60px rgba(204,0,0,0.5), 0 2px 8px rgba(0,0,0,0.9)" }}>
-          {title.split("").map((char, i) => (
-            <span key={i} ref={(el) => (lettersRef.current[i] = el)} style={{ display:"inline-block", opacity:0 }}>{char}</span>
-          ))}
-        </h1>
-        <motion.div initial={{ opacity:0, scale:0.8 }} animate={{ opacity:1, scale:1 }} transition={{ delay:1.6, duration:0.8 }} style={{ fontFamily:"'Cinzel Decorative', serif", fontSize:"clamp(2rem, 7vw, 5rem)", color:"#D4AF37", letterSpacing:"0.35em", marginTop:"0.15em", textShadow:"0 0 30px rgba(212,175,55,0.8)" }}>
-          6.0
+      {/* Content */}
+      <div style={{ position:"relative", zIndex:4, textAlign:"center", padding:"0 1.5rem", width:"100%", maxWidth:"900px" }}>
+
+        {/* Badge */}
+        <motion.div initial={{ opacity:0, y:-20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.2, duration:0.6 }}
+          style={{ display:"inline-block", fontFamily:"var(--font-mono)", fontSize:"0.7rem", letterSpacing:"0.2em", color:"var(--color-primary)", border:"1px solid var(--color-border-active)", padding:"0.35em 1.2em", borderRadius:"9999px", marginBottom:"1.5rem", background:"rgba(193,103,255,0.08)", backdropFilter:"blur(8px)" }}>
+          PROVENANCE 6.0 &nbsp;·&nbsp; MAY 14–15 &nbsp;·&nbsp; RVSCET
         </motion.div>
-        <motion.p initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:2, duration:0.8 }} style={{ fontFamily:"'Noto Serif JP', serif", fontSize:"clamp(0.55rem, 1.8vw, 0.95rem)", color:"rgba(255,255,255,0.65)", letterSpacing:"0.28em", marginTop:"1.2rem", textTransform:"uppercase", whiteSpace:"nowrap" }}>
-          無限の戦い — The Infinite Battle
+
+        {/* Main title */}
+        <motion.h1 initial={{ opacity:0, y:40 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.4, duration:0.8 }}
+          style={{ fontFamily:"var(--font-display)", fontSize:"clamp(3rem, 10vw, 8rem)", fontWeight:700, lineHeight:1, color:"#fff", letterSpacing:"0.05em", textShadow:"0 0 60px rgba(193,103,255,0.5), 0 0 120px rgba(255,102,255,0.2)", marginBottom:"0.4rem" }}>
+          INFINITE REALMS
+        </motion.h1>
+
+        <motion.h2 initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.6, duration:0.7 }}
+          style={{ fontFamily:"var(--font-display)", fontSize:"clamp(1rem, 3vw, 2rem)", fontWeight:500, color:"var(--color-secondary)", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:"1rem" }}>
+          The Anime Protocol
+        </motion.h2>
+
+        <motion.p initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:0.8, duration:0.7 }}
+          style={{ fontFamily:"var(--font-body)", fontSize:"clamp(0.85rem, 1.5vw, 1rem)", color:"var(--color-text-secondary)", marginBottom:"0.6rem" }}>
+          A multi-club inter-college fest powered by Helix v2.0
         </motion.p>
-        <motion.div initial={{ scaleX:0 }} animate={{ scaleX:1 }} transition={{ delay:2.2, duration:1 }} style={{ height:"1px", background:"linear-gradient(to right, transparent, #CC0000, #D4AF37, #CC0000, transparent)", margin:"1.2rem auto 0", width:"min(560px, 78vw)", transformOrigin:"center" }} />
-        <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:2.5, duration:0.7 }} style={{ marginTop:"2rem", display:"flex", gap:"0.85rem", justifyContent:"center", alignItems:"center" }}>
-          <a href="#events" style={{ display:"inline-block", fontFamily:"'Cinzel Decorative', serif", fontSize:"clamp(0.55rem, 1.5vw, 0.8rem)", letterSpacing:"0.22em", color:"#D4AF37", border:"1px solid #D4AF37", padding:"0.8em 2.2em", textDecoration:"none", textTransform:"uppercase", background:"rgba(0,0,0,0.35)", backdropFilter:"blur(6px)", transition:"all 0.3s ease" }}
-            onMouseEnter={(e) => { e.currentTarget.style.background="#D4AF37"; e.currentTarget.style.color="#000"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background="rgba(0,0,0,0.35)"; e.currentTarget.style.color="#D4AF37"; }}>
-            Explore Events
+
+        <motion.p initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:0.9, duration:0.7 }}
+          style={{ fontFamily:"var(--font-mono)", fontSize:"0.75rem", color:"var(--color-text-muted)", letterSpacing:"0.15em", marginBottom:"2.5rem" }}>
+          5 Clubs &nbsp;·&nbsp; 30+ Events &nbsp;·&nbsp; RVSCET, Jamshedpur
+        </motion.p>
+
+        {/* CTAs */}
+        <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:1, duration:0.6 }}
+          style={{ display:"flex", gap:"1rem", justifyContent:"center", flexWrap:"wrap", marginBottom:"3rem" }}>
+          <a href="/register" style={{ fontFamily:"var(--font-display)", fontWeight:600, fontSize:"1rem", letterSpacing:"0.08em", padding:"0.75em 2.2em", borderRadius:"0.375rem", background:"var(--gradient-cta-primary)", color:"#fff", textDecoration:"none", boxShadow:"0 0 24px rgba(193,103,255,0.4)", transition:"all 0.3s ease", display:"flex", alignItems:"center", gap:"0.5em" }}
+            onMouseEnter={e => { e.currentTarget.style.background="var(--gradient-cta-hover)"; e.currentTarget.style.boxShadow="0 0 36px rgba(255,102,255,0.6)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background="var(--gradient-cta-primary)"; e.currentTarget.style.boxShadow="0 0 24px rgba(193,103,255,0.4)"; }}>
+            ⚡ Register Now
           </a>
-          <button onClick={toggleMute} title={muted ? "Unmute" : "Mute"} style={{ background:"rgba(0,0,0,0.45)", border:"1px solid rgba(212,175,55,0.6)", borderRadius:"50%", width:"42px", height:"42px", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", backdropFilter:"blur(6px)", flexShrink:0 }}>
-            {muted ? (
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-            ) : (
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-            )}
-          </button>
+          <a href="/brochure" style={{ fontFamily:"var(--font-display)", fontWeight:600, fontSize:"1rem", letterSpacing:"0.08em", padding:"0.75em 2.2em", borderRadius:"0.375rem", background:"transparent", color:"var(--color-primary)", border:"1px solid var(--color-border-active)", textDecoration:"none", transition:"all 0.3s ease" }}
+            onMouseEnter={e => { e.currentTarget.style.background="rgba(193,103,255,0.1)"; e.currentTarget.style.boxShadow="0 0 20px rgba(193,103,255,0.3)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background="transparent"; e.currentTarget.style.boxShadow="none"; }}>
+            ↓ Download Brochure
+          </a>
+        </motion.div>
+
+        {/* Countdown */}
+        <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:1.2, duration:0.8 }}
+          style={{ display:"flex", gap:"clamp(1rem, 4vw, 2.5rem)", justifyContent:"center" }}>
+          {[["DAYS", pad(d)], ["HRS", pad(h)], ["MINS", pad(m)], ["SECS", pad(s)]].map(([label, val]) => (
+            <div key={label} style={{ textAlign:"center" }}>
+              <div style={{ fontFamily:"var(--font-mono)", fontSize:"clamp(1.8rem, 5vw, 3rem)", fontWeight:500, color:"#fff", lineHeight:1, textShadow:"0 0 20px rgba(193,103,255,0.6)" }}>{val}</div>
+              <div style={{ fontFamily:"var(--font-mono)", fontSize:"0.6rem", letterSpacing:"0.2em", color:"var(--color-text-muted)", marginTop:"0.3rem" }}>{label}</div>
+            </div>
+          ))}
         </motion.div>
       </div>
 
-      <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:3, duration:1 }} style={{ position:"absolute", bottom:"1.8rem", left:"50%", transform:"translateX(-50%)", zIndex:4, display:"flex", flexDirection:"column", alignItems:"center", gap:"0.35rem" }}>
-        <span style={{ fontFamily:"'Noto Serif JP', serif", fontSize:"0.6rem", letterSpacing:"0.3em", color:"rgba(255,255,255,0.35)", textTransform:"uppercase" }}>Scroll</span>
-        <motion.div animate={{ y:[0,8,0] }} transition={{ repeat:Infinity, duration:1.6, ease:"easeInOut" }} style={{ width:"1px", height:"36px", background:"linear-gradient(to bottom, rgba(212,175,55,0.7), transparent)" }} />
+      {/* Mute button */}
+      <button onClick={toggleMute} style={{ position:"absolute", bottom:"2rem", right:"1.5rem", zIndex:5, background:"rgba(13,13,26,0.6)", border:"1px solid rgba(193,103,255,0.4)", borderRadius:"50%", width:"40px", height:"40px", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", backdropFilter:"blur(6px)" }}>
+        {muted
+          ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C167FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+          : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C167FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        }
+      </button>
+
+      {/* Scroll indicator */}
+      <motion.div animate={{ y:[0,8,0] }} transition={{ repeat:Infinity, duration:1.6 }}
+        style={{ position:"absolute", bottom:"1.8rem", left:"50%", transform:"translateX(-50%)", zIndex:5, display:"flex", flexDirection:"column", alignItems:"center", gap:"0.3rem" }}>
+        <span style={{ fontFamily:"var(--font-mono)", fontSize:"0.55rem", letterSpacing:"0.3em", color:"var(--color-text-muted)" }}>SCROLL</span>
+        <div style={{ width:"1px", height:"32px", background:"linear-gradient(to bottom, var(--color-primary), transparent)" }} />
       </motion.div>
 
     </section>

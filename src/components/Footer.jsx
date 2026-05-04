@@ -1,194 +1,53 @@
-import { motion } from 'framer-motion';
-import { festInfo } from '../data/events';
+import { motion } from "framer-motion";
+
+const LINKS = [
+  { label:"Events", href:"#events" }, { label:"Gallery", href:"#gallery" },
+  { label:"Register", href:"/register" }, { label:"Brochure", href:"/brochure" },
+  { label:"Schedule", href:"/schedule" }, { label:"Contact", href:"#contact" },
+];
 
 export default function Footer() {
   return (
-    <footer id="contact" style={{
-      position: 'relative',
-      borderTop: '1px solid var(--border-gold)',
-      overflow: 'hidden',
-    }}>
-      {/* Background */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: 'linear-gradient(180deg, var(--void) 0%, rgba(5,12,26,0.95) 100%)',
-        pointerEvents: 'none',
-      }} />
-
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: '1400px', margin: '0 auto' }}>
-        {/* Top CTA */}
-        <div style={{
-          textAlign: 'center',
-          padding: 'clamp(60px, 10vw, 100px) clamp(20px, 5vw, 80px) clamp(40px, 6vw, 60px)',
-          borderBottom: '1px solid var(--border-gold)',
-        }}>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <p style={{
-              fontFamily: "'Noto Serif JP', serif",
-              fontSize: '12px', letterSpacing: '0.5em',
-              color: 'var(--blood-red)', textTransform: 'uppercase',
-              marginBottom: '20px',
-            }}>⚔ Final Call ⚔</p>
-            <h2 style={{
-              fontFamily: "'Cinzel Decorative', serif",
-              fontSize: 'clamp(24px, 5vw, 52px)',
-              fontWeight: 900, color: 'var(--text-primary)',
-              marginBottom: '16px',
-              textShadow: '0 0 40px rgba(212,175,55,0.3)',
-            }}>
-              <span className="shimmer-text">JOIN THE BATTLE</span>
-            </h2>
-            <p style={{
-              fontFamily: "'Inter', sans-serif", fontSize: '15px',
-              color: 'var(--text-secondary)',
-              maxWidth: '480px', margin: '0 auto 36px',
-              lineHeight: 1.8,
-            }}>
-              Your arc begins at {festInfo.venue} on {festInfo.date}. Will your name be written in the legend?
-            </p>
-
-            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <motion.button
-                whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(212,175,55,0.4)' }}
-                whileTap={{ scale: 0.97 }}
-                style={{
-                  padding: '14px 40px',
-                  background: 'linear-gradient(135deg, var(--crimson), var(--blood-red))',
-                  border: '1px solid var(--gold)',
-                  color: 'var(--gold)',
-                  fontFamily: "'Cinzel', serif",
-                  fontSize: '13px', letterSpacing: '0.2em',
-                  textTransform: 'uppercase', cursor: 'none',
-                  clipPath: 'polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)',
-                }}
-              >
-                Register Now
-              </motion.button>
+    <footer style={{ background:"var(--color-bg-surface)", borderTop:"1px solid var(--color-border-subtle)", padding:"3rem 2rem 2rem" }}>
+      <div style={{ maxWidth:"1200px", margin:"0 auto" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:"2rem", marginBottom:"2.5rem" }}>
+          <div>
+            <div style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:"1.4rem", color:"#fff", marginBottom:"0.5rem" }}>
+              <span style={{ color:"var(--color-primary)" }}>P</span>ROVENANCE
+              <span style={{ fontFamily:"var(--font-mono)", fontSize:"0.8rem", color:"var(--color-accent)", marginLeft:"0.3em" }}>6.0</span>
             </div>
-          </motion.div>
-        </div>
-
-        {/* Footer bottom */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '40px',
-          padding: 'clamp(40px, 6vw, 60px) clamp(20px, 5vw, 80px)',
-        }}>
-          {/* Brand */}
-          <div>
-            <div style={{
-              fontFamily: "'Cinzel Decorative', serif",
-              fontSize: '20px', fontWeight: 900,
-              color: 'var(--gold)', marginBottom: '8px',
-            }}>PROVENANCE</div>
-            <div style={{
-              fontFamily: "'Cinzel', serif",
-              fontSize: '14px', color: 'var(--blood-red)',
-              letterSpacing: '0.3em', marginBottom: '16px',
-            }}>6.0</div>
-            <p style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: '13px', color: 'var(--text-secondary)',
-              lineHeight: 1.7, maxWidth: '220px',
-            }}>
-              The annual techno-cultural extravaganza of RVSCET, Coimbatore.
+            <p style={{ fontFamily:"var(--font-mono)", fontSize:"0.65rem", letterSpacing:"0.15em", color:"var(--color-text-muted)", marginBottom:"0.5rem" }}>INFINITE REALMS: THE ANIME PROTOCOL</p>
+            <p style={{ fontFamily:"var(--font-body)", fontSize:"0.82rem", color:"var(--color-text-secondary)", lineHeight:1.6 }}>
+              RVSCET's flagship inter-college techno-cultural fest.<br/>May 14–15, 2026 · Jamshedpur
             </p>
           </div>
-
-          {/* Event info */}
           <div>
-            <h4 style={{
-              fontFamily: "'Cinzel', serif", fontSize: '13px',
-              color: 'var(--gold)', letterSpacing: '0.2em',
-              textTransform: 'uppercase', marginBottom: '20px',
-            }}>Event Details</h4>
-            {[
-              { icon: '📅', text: 'May 14 & 15, 2026' },
-              { icon: '🏛', text: 'RVSCET Campus' },
-              { icon: '📍', text: 'Coimbatore, Tamil Nadu' },
-              { icon: '⏰', text: '9:00 AM onwards' },
-            ].map(({ icon, text }) => (
-              <div key={text} style={{
-                display: 'flex', gap: '10px', alignItems: 'center',
-                marginBottom: '10px',
-                fontFamily: "'Inter', sans-serif", fontSize: '13px',
-                color: 'var(--text-secondary)',
-              }}>
-                <span>{icon}</span><span>{text}</span>
-              </div>
-            ))}
+            <p style={{ fontFamily:"var(--font-mono)", fontSize:"0.65rem", letterSpacing:"0.2em", color:"var(--color-primary)", marginBottom:"1rem" }}>QUICK LINKS</p>
+            <div style={{ display:"flex", flexDirection:"column", gap:"0.5rem" }}>
+              {LINKS.map(l => (
+                <a key={l.label} href={l.href} style={{ fontFamily:"var(--font-body)", fontSize:"0.85rem", color:"var(--color-text-secondary)", textDecoration:"none", transition:"color 0.2s" }}
+                  onMouseEnter={e => e.currentTarget.style.color="var(--color-primary)"}
+                  onMouseLeave={e => e.currentTarget.style.color="var(--color-text-secondary)"}>
+                  {l.label}
+                </a>
+              ))}
+            </div>
           </div>
-
-          {/* Contact / Clubs */}
           <div>
-            <h4 style={{
-              fontFamily: "'Cinzel', serif", fontSize: '13px',
-              color: 'var(--gold)', letterSpacing: '0.2em',
-              textTransform: 'uppercase', marginBottom: '20px',
-            }}>The Guilds</h4>
-            {['HELIX — Tech & AI', 'TARANGANI — Cultural', 'XPECTRA — Media', 'RVS PANTHERS — Sports', 'CIRCUITORN — IoT'].map(g => (
-              <div key={g} style={{
-                fontFamily: "'Inter', sans-serif", fontSize: '13px',
-                color: 'var(--text-secondary)', marginBottom: '8px',
-                paddingLeft: '12px', borderLeft: '1px solid var(--border-gold)',
-              }}>{g}</div>
-            ))}
-          </div>
-
-          {/* Social */}
-          <div>
-            <h4 style={{
-              fontFamily: "'Cinzel', serif", fontSize: '13px',
-              color: 'var(--gold)', letterSpacing: '0.2em',
-              textTransform: 'uppercase', marginBottom: '20px',
-            }}>Follow the Arc</h4>
-            {[
-              { name: 'Instagram', icon: '📸', href: '#' },
-              { name: 'LinkedIn', icon: '💼', href: '#' },
-              { name: 'YouTube', icon: '🎬', href: '#' },
-            ].map(s => (
-              <motion.a
-                key={s.name}
-                href={s.href}
-                whileHover={{ x: 4, color: 'var(--gold)' }}
-                style={{
-                  display: 'flex', gap: '10px', alignItems: 'center',
-                  marginBottom: '10px', textDecoration: 'none',
-                  fontFamily: "'Inter', sans-serif", fontSize: '13px',
-                  color: 'var(--text-secondary)', cursor: 'none',
-                  transition: 'color 0.3s ease',
-                }}
-              >
-                <span>{s.icon}</span><span>{s.name}</span>
-              </motion.a>
-            ))}
+            <p style={{ fontFamily:"var(--font-mono)", fontSize:"0.65rem", letterSpacing:"0.2em", color:"var(--color-primary)", marginBottom:"1rem" }}>CONTACT</p>
+            <p style={{ fontFamily:"var(--font-body)", fontSize:"0.85rem", color:"var(--color-text-secondary)", lineHeight:1.8 }}>
+              Helix v2.0 — RVSCET<br/>
+              Jamshedpur, Jharkhand<br/>
+              <a href="mailto:helix@rvscet.ac.in" style={{ color:"var(--color-primary)", textDecoration:"none" }}>helix@rvscet.ac.in</a>
+            </p>
           </div>
         </div>
-
-        {/* Copyright */}
-        <div style={{
-          borderTop: '1px solid var(--border-gold)',
-          padding: '20px clamp(20px, 5vw, 80px)',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          flexWrap: 'wrap', gap: '12px',
-        }}>
-          <p style={{
-            fontFamily: "'Noto Serif JP', serif", fontSize: '11px',
-            color: 'var(--text-secondary)', letterSpacing: '0.15em',
-          }}>
-            © 2026 Provenance 6.0 · RVSCET · All rights reserved
+        <div style={{ borderTop:"1px solid var(--color-border-subtle)", paddingTop:"1.5rem", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:"1rem" }}>
+          <p style={{ fontFamily:"var(--font-mono)", fontSize:"0.65rem", color:"var(--color-text-muted)", letterSpacing:"0.1em" }}>
+            © 2026 PROVENANCE 6.0 · HELIX V2.0 · RVSCET. ALL RIGHTS RESERVED.
           </p>
-          <p style={{
-            fontFamily: "'Cinzel', serif", fontSize: '11px',
-            color: 'var(--blood-red)', letterSpacing: '0.3em',
-          }}>
-            ⚔ MAY THE LEGEND CONTINUE ⚔
+          <p style={{ fontFamily:"var(--font-mono)", fontSize:"0.65rem", color:"var(--color-text-muted)" }}>
+            Built by Web Team · Priyanshu Ghosh
           </p>
         </div>
       </div>
