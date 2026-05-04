@@ -1,383 +1,114 @@
-import { useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { gsap } from 'gsap';
+import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { gsap } from "gsap";
 
-// Lightning bolt SVG paths for Zenitsu thunder breathing effect
-const LightningBolt = ({ style, className }) => (
-  <svg viewBox="0 0 60 120" fill="none" xmlns="http://www.w3.org/2000/svg"
-    style={style} className={className}>
-    <path d="M35 5L10 65H30L20 115L55 45H35L45 5H35Z"
-      fill="url(#thunder-grad)" filter="url(#thunder-blur)" />
-    <defs>
-      <linearGradient id="thunder-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#FFE566" />
-        <stop offset="50%" stopColor="#F5C842" />
-        <stop offset="100%" stopColor="#D4AF37" />
-      </linearGradient>
-      <filter id="thunder-blur">
-        <feGaussianBlur stdDeviation="2" result="blur" />
-        <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-      </filter>
-    </defs>
-  </svg>
-);
-
-// Infinity Castle pillars
-const CastlePillar = ({ x, delay, scale = 1 }) => (
-  <motion.div
-    initial={{ scaleY: 0, opacity: 0 }}
-    animate={{ scaleY: 1, opacity: 0.6 }}
-    transition={{ duration: 1.5, delay, ease: [0.22, 1, 0.36, 1] }}
-    style={{
-      position: 'absolute',
-      bottom: 0,
-      left: `${x}%`,
-      width: `${3 * scale}px`,
-      height: `${200 + Math.random() * 300}px`,
-      background: 'linear-gradient(to top, rgba(212,175,55,0.15), transparent)',
-      transformOrigin: 'bottom center',
-      borderLeft: '1px solid rgba(212,175,55,0.2)',
-      borderRight: '1px solid rgba(212,175,55,0.2)',
-    }}
-  />
-);
+const YOUTUBE_VIDEO_ID = "nAe82r8C9_4";
 
 export default function Hero() {
-  const containerRef = useRef(null);
-  const titleRef = useRef(null);
-  const lightningContainerRef = useRef(null);
-  const videoRef = useRef(null);
-
-  const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 800], [0, 250]);
-  const opacity = useTransform(scrollY, [0, 600], [1, 0]);
-  const scale = useTransform(scrollY, [0, 600], [1, 1.15]);
+  const lettersRef = useRef([]);
+  const overlayRef = useRef(null);
+  const playerContainerRef = useRef(null);
+  const [videoReady, setVideoReady] = useState(false);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Staggered title letters animation
-      gsap.fromTo('.hero-letter',
-        { y: 120, opacity: 0, rotateX: -90 },
-        {
-          y: 0, opacity: 1, rotateX: 0,
-          duration: 1.2,
-          stagger: 0.06,
-          ease: 'power4.out',
-          delay: 0.5
-        }
-      );
-
-      // Tagline slide in
-      gsap.fromTo('.hero-tagline',
-        { x: -80, opacity: 0 },
-        { x: 0, opacity: 1, duration: 1, delay: 1.8, ease: 'power3.out' }
-      );
-
-      // Date and venue
-      gsap.fromTo('.hero-meta',
-        { y: 40, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, delay: 2.2, ease: 'power2.out' }
-      );
-
-      // CTA buttons
-      gsap.fromTo('.hero-cta',
-        { scale: 0.8, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.6, delay: 2.6, ease: 'back.out(1.7)' }
-      );
-
-      // Continuous lightning bolts spawning
-      const spawnLightning = () => {
-        const container = lightningContainerRef.current;
-        if (!container) return;
-
-        const bolt = document.createElement('div');
-        const x = Math.random() * 100;
-        const size = 20 + Math.random() * 40;
-
-        bolt.style.cssText = `
-          position: absolute;
-          left: ${x}%;
-          top: ${Math.random() * 70}%;
-          width: ${size}px;
-          height: ${size * 2}px;
-          opacity: 0;
-          pointer-events: none;
-          z-index: 2;
-        `;
-        bolt.innerHTML = `<svg viewBox="0 0 60 120" width="100%" height="100%">
-          <path d="M35 5L10 65H30L20 115L55 45H35L45 5H35Z" fill="#F5C842" opacity="0.9" filter="url(#gb)"/>
-          <defs><filter id="gb"><feGaussianBlur stdDeviation="3"/></filter></defs>
-        </svg>`;
-
-        container.appendChild(bolt);
-
-        gsap.to(bolt, {
-          opacity: 1, duration: 0.05,
-          onComplete: () => {
-            gsap.to(bolt, {
-              opacity: 0, duration: 0.15, delay: 0.05,
-              onComplete: () => bolt.remove()
-            });
-          }
-        });
-      };
-
-      // Spawn lightning at random intervals
-      const interval = setInterval(spawnLightning, 400 + Math.random() * 600);
-
-      // Floating particles (demon slayer haori pattern circles)
-      gsap.utils.toArray('.particle').forEach((p, i) => {
-        gsap.to(p, {
-          y: '-120vh',
-          x: `random(-50, 50)`,
-          rotation: `random(-360, 360)`,
-          opacity: 0,
-          duration: `random(4, 8)`,
-          delay: i * 0.3,
-          repeat: -1,
-          ease: 'none',
-          repeatDelay: `random(0, 2)`
-        });
-      });
-
-      return () => clearInterval(interval);
-    }, containerRef);
-
-    return () => ctx.revert();
+    const letters = lettersRef.current.filter(Boolean);
+    gsap.fromTo(
+      letters,
+      { opacity: 0, y: 60, skewX: -10 },
+      {
+        opacity: 1,
+        y: 0,
+        skewX: 0,
+        duration: 1.2,
+        ease: "power4.out",
+        stagger: 0.08,
+        delay: 0.5,
+      }
+    );
+    gsap.fromTo(
+      overlayRef.current,
+      { opacity: 0.95 },
+      { opacity: 0.55, duration: 2, ease: "power2.inOut", delay: 0.3 }
+    );
   }, []);
 
-  const titleChars = "PROVENANCE".split('');
-  const versionChars = "6.0".split('');
+  useEffect(() => {
+    if (window.YT && window.YT.Player) { initPlayer(); return; }
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScript = document.getElementsByTagName("script")[0];
+    firstScript.parentNode.insertBefore(tag, firstScript);
+    window.onYouTubeIframeAPIReady = initPlayer;
+    return () => { window.onYouTubeIframeAPIReady = null; };
+  }, []);
 
-  const pillarPositions = [5, 12, 20, 30, 45, 55, 68, 78, 88, 95];
+  function initPlayer() {
+    if (!playerContainerRef.current) return;
+    new window.YT.Player(playerContainerRef.current, {
+      videoId: YOUTUBE_VIDEO_ID,
+      playerVars: {
+        autoplay: 1, mute: 1, loop: 1,
+        playlist: YOUTUBE_VIDEO_ID,
+        controls: 0, showinfo: 0, rel: 0,
+        modestbranding: 1, playsinline: 1,
+        disablekb: 1, fs: 0, iv_load_policy: 3,
+      },
+      events: {
+        onReady: (e) => { e.target.playVideo(); setVideoReady(true); },
+        onStateChange: (e) => {
+          if (e.data === window.YT.PlayerState.ENDED) e.target.playVideo();
+        },
+      },
+    });
+  }
+
+  const title = "PROVENANCE";
 
   return (
-    <section ref={containerRef} style={{
-      position: 'relative',
-      height: '100vh',
-      minHeight: '700px',
-      overflow: 'hidden',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}>
-      {/* VIDEO BACKGROUND — Zenitsu Infinity Castle scene */}
-      <motion.div style={{ y, scale, position: 'absolute', inset: 0, zIndex: 0 }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(180deg, rgba(2,4,8,0.3) 0%, rgba(5,12,26,0.5) 50%, rgba(2,4,8,0.9) 100%)',
-          zIndex: 1
-        }} />
-        {/* Primary video embed — Demon Slayer Infinity Castle */}
-        <video
-          ref={videoRef}
-          autoPlay muted loop playsInline
-          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.45 }}
-        >
-          {/* Replace with actual video file in /public/hero-video.mp4 */}
-          <source src="/hero-video.mp4" type="video/mp4" />
-        </video>
-        {/* Fallback animated background if video not loaded */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: `
-            radial-gradient(ellipse 80% 60% at 50% 40%, rgba(100, 0, 0, 0.25) 0%, transparent 70%),
-            radial-gradient(ellipse 60% 80% at 20% 60%, rgba(107, 33, 168, 0.15) 0%, transparent 60%),
-            radial-gradient(ellipse 40% 40% at 80% 30%, rgba(245, 200, 66, 0.1) 0%, transparent 50%),
-            linear-gradient(180deg, #020408 0%, #050C1A 30%, #0A1628 60%, #020408 100%)
-          `,
-          zIndex: 0
-        }} />
-      </motion.div>
+    <section style={{ position:"relative", width:"100%", height:"100dvh", minHeight:"100vh", overflow:"hidden", background:"#000", display:"flex", alignItems:"center", justifyContent:"center" }}>
 
-      {/* Infinity Castle Pillars */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 1, overflow: 'hidden' }}>
-        {pillarPositions.map((x, i) => (
-          <CastlePillar key={i} x={x} delay={0.1 * i} scale={1 + (i % 3) * 0.5} />
-        ))}
+      <div style={{ position:"absolute", inset:0, zIndex:0, pointerEvents:"none", overflow:"hidden" }}>
+        <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", width:"max(100vw, 177.78vh)", height:"max(100vh, 56.25vw)" }}>
+          <div ref={playerContainerRef} style={{ width:"100%", height:"100%" }} />
+        </div>
+        <div style={{ position:"absolute", inset:0, background:"#000", opacity: videoReady ? 0 : 1, transition:"opacity 1.5s ease", pointerEvents:"none" }} />
       </div>
 
-      {/* Lightning container */}
-      <div ref={lightningContainerRef} style={{
-        position: 'absolute', inset: 0, zIndex: 2, overflow: 'hidden', pointerEvents: 'none'
-      }} />
+      <div ref={overlayRef} style={{ position:"absolute", inset:0, zIndex:1, background:"linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(10,0,0,0.55) 50%, rgba(0,0,0,0.85) 100%)", pointerEvents:"none" }} />
 
-      {/* Floating particles */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 2, overflow: 'hidden', pointerEvents: 'none' }}>
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="particle" style={{
-            position: 'absolute',
-            bottom: '0',
-            left: `${Math.random() * 100}%`,
-            width: `${2 + Math.random() * 4}px`,
-            height: `${2 + Math.random() * 4}px`,
-            borderRadius: '50%',
-            background: i % 3 === 0 ? '#F5C842' : i % 3 === 1 ? '#CC0000' : '#D4AF37',
-            opacity: 0.7,
-            boxShadow: `0 0 6px currentColor`,
-          }} />
-        ))}
-      </div>
+      <div style={{ position:"absolute", inset:0, zIndex:2, pointerEvents:"none", opacity:0.06, backgroundImage:`url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`, backgroundRepeat:"repeat", backgroundSize:"128px 128px" }} />
 
-      {/* Scanline effect */}
-      <div style={{
-        position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
-        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)',
-      }} />
+      <div style={{ position:"relative", zIndex:3, textAlign:"center", padding:"0 1rem", width:"100%" }}>
+        <h1 style={{ fontFamily:"'Cinzel Decorative', serif", fontSize:"clamp(2.2rem, 10vw, 8rem)", fontWeight:900, letterSpacing:"0.2em", color:"#fff", margin:0, lineHeight:1, display:"flex", justifyContent:"center", flexWrap:"wrap", gap:"0.02em", textShadow:"0 0 40px rgba(204,0,0,0.6), 0 2px 8px rgba(0,0,0,0.9)" }}>
+          {title.split("").map((char, i) => (
+            <span key={i} ref={(el) => (lettersRef.current[i] = el)} style={{ display:"inline-block", opacity:0 }}>{char}</span>
+          ))}
+        </h1>
 
-      {/* HERO CONTENT */}
-      <motion.div style={{ opacity, position: 'relative', zIndex: 10, textAlign: 'center', padding: '0 20px' }}>
+        <motion.div initial={{ opacity:0, scale:0.8 }} animate={{ opacity:1, scale:1 }} transition={{ delay:1.6, duration:0.8, ease:"easeOut" }} style={{ fontFamily:"'Cinzel Decorative', serif", fontSize:"clamp(1.8rem, 6vw, 5rem)", color:"#D4AF37", letterSpacing:"0.4em", marginTop:"0.1em", textShadow:"0 0 30px rgba(212,175,55,0.7)" }}>
+          6.0
+        </motion.div>
 
-        {/* Pre-title */}
-        <motion.p
-          className="hero-tagline"
-          style={{
-            fontFamily: "'Noto Serif JP', serif",
-            fontSize: 'clamp(11px, 1.5vw, 14px)',
-            letterSpacing: '0.4em',
-            color: 'var(--gold)',
-            textTransform: 'uppercase',
-            marginBottom: '24px',
-            opacity: 0,
-          }}>
-          ⚔ &nbsp; R V S C E T &nbsp; P R E S E N T S &nbsp; ⚔
+        <motion.p initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:2, duration:0.8 }} style={{ fontFamily:"'Noto Serif JP', serif", fontSize:"clamp(0.75rem, 2.5vw, 1.1rem)", color:"rgba(255,255,255,0.7)", letterSpacing:"0.3em", marginTop:"1.5rem", textTransform:"uppercase" }}>
+          無限の戦い — The Infinite Battle
         </motion.p>
 
-        {/* Main Title — Split letter animation */}
-        <div style={{ perspective: '800px', marginBottom: '8px' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(2px, 0.8vw, 10px)', flexWrap: 'wrap' }}>
-            {titleChars.map((char, i) => (
-              <span key={i} className="hero-letter shimmer-text" style={{
-                fontFamily: "'Cinzel Decorative', serif",
-                fontSize: 'clamp(32px, 8vw, 120px)',
-                fontWeight: 900,
-                display: 'inline-block',
-                opacity: 0,
-                lineHeight: 1,
-                textShadow: '0 0 40px rgba(212,175,55,0.5)',
-              }}>{char}</span>
-            ))}
-          </div>
+        <motion.div initial={{ scaleX:0 }} animate={{ scaleX:1 }} transition={{ delay:2.2, duration:1, ease:"easeInOut" }} style={{ height:"2px", background:"linear-gradient(to right, transparent, #CC0000, #D4AF37, #CC0000, transparent)", margin:"1.5rem auto 0", width:"min(600px, 80vw)", transformOrigin:"center" }} />
 
-          {/* Version number */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(2px, 0.5vw, 8px)', marginTop: '-8px' }}>
-            {versionChars.map((char, i) => (
-              <span key={i} className="hero-letter" style={{
-                fontFamily: "'Cinzel Decorative', serif",
-                fontSize: 'clamp(20px, 5vw, 72px)',
-                fontWeight: 900,
-                display: 'inline-block',
-                opacity: 0,
-                color: 'var(--blood-red)',
-                textShadow: '0 0 30px rgba(204,0,0,0.8), 0 0 60px rgba(204,0,0,0.4)',
-                lineHeight: 1,
-              }}>{char}</span>
-            ))}
-          </div>
-        </div>
-
-        {/* Decorative sword divider */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', margin: '20px 0' }}>
-          <div style={{ height: '1px', width: 'clamp(60px, 12vw, 160px)', background: 'linear-gradient(to right, transparent, var(--gold))' }} />
-          <span style={{ color: 'var(--gold)', fontSize: '20px' }}>⚡</span>
-          <div style={{ height: '1px', width: 'clamp(60px, 12vw, 160px)', background: 'linear-gradient(to left, transparent, var(--gold))' }} />
-        </div>
-
-        {/* Tagline */}
-        <p style={{
-          fontFamily: "'Cinzel', serif",
-          fontSize: 'clamp(14px, 2vw, 22px)',
-          color: 'var(--text-primary)',
-          letterSpacing: '0.2em',
-          marginBottom: '8px',
-          textShadow: '0 2px 20px rgba(0,0,0,0.8)',
-        }}>The Legend Returns</p>
-
-        {/* Meta info */}
-        <div className="hero-meta" style={{
-          display: 'flex', gap: 'clamp(12px, 3vw, 40px)', justifyContent: 'center',
-          alignItems: 'center', flexWrap: 'wrap',
-          marginTop: '20px', marginBottom: '40px', opacity: 0
-        }}>
-          {[
-            { icon: '📅', text: 'May 14 & 15, 2026' },
-            { icon: '⚔', text: 'RVSCET' },
-            { icon: '🏛', text: 'Coimbatore' },
-          ].map(({ icon, text }) => (
-            <div key={text} style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              fontFamily: "'Inter', sans-serif",
-              fontSize: 'clamp(12px, 1.4vw, 15px)',
-              color: 'var(--text-secondary)',
-              letterSpacing: '0.1em',
-            }}>
-              <span>{icon}</span>
-              <span>{text}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* CTA Buttons */}
-        <div className="hero-cta" style={{
-          display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', opacity: 0
-        }}>
-          <motion.a
-            href="#events"
-            whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(212,175,55,0.5)' }}
-            whileTap={{ scale: 0.97 }}
-            style={{
-              padding: 'clamp(12px, 2vw, 16px) clamp(24px, 4vw, 48px)',
-              background: 'linear-gradient(135deg, var(--crimson), var(--blood-red))',
-              border: '1px solid var(--gold)',
-              color: 'var(--gold)',
-              fontFamily: "'Cinzel', serif",
-              fontSize: 'clamp(12px, 1.4vw, 15px)',
-              letterSpacing: '0.2em',
-              textDecoration: 'none',
-              textTransform: 'uppercase',
-              cursor: 'none',
-              clipPath: 'polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)',
-            }}>
-            View Events
-          </motion.a>
-          <motion.a
-            href="#glimpses"
-            whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(212,175,55,0.3)' }}
-            whileTap={{ scale: 0.97 }}
-            style={{
-              padding: 'clamp(12px, 2vw, 16px) clamp(24px, 4vw, 48px)',
-              background: 'transparent',
-              border: '1px solid var(--border-gold)',
-              color: 'var(--text-primary)',
-              fontFamily: "'Cinzel', serif",
-              fontSize: 'clamp(12px, 1.4vw, 15px)',
-              letterSpacing: '0.2em',
-              textDecoration: 'none',
-              textTransform: 'uppercase',
-              cursor: 'none',
-              clipPath: 'polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)',
-            }}>
-            Past Glimpses
-          </motion.a>
-        </div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-          style={{ marginTop: '60px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}
-        >
-          <span style={{ fontFamily: "'Noto Serif JP', serif", fontSize: '11px', letterSpacing: '0.3em', color: 'var(--text-secondary)' }}>SCROLL</span>
-          <div style={{ width: '1px', height: '40px', background: 'linear-gradient(to bottom, var(--gold), transparent)' }} />
+        <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:2.5, duration:0.7 }} style={{ marginTop:"2.5rem" }}>
+          <a href="#events" style={{ display:"inline-block", fontFamily:"'Cinzel Decorative', serif", fontSize:"clamp(0.7rem, 1.8vw, 0.9rem)", letterSpacing:"0.25em", color:"#D4AF37", border:"1px solid #D4AF37", padding:"0.75em 2.5em", textDecoration:"none", textTransform:"uppercase", background:"rgba(0,0,0,0.3)", backdropFilter:"blur(4px)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background="#D4AF37"; e.currentTarget.style.color="#000"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background="rgba(0,0,0,0.3)"; e.currentTarget.style.color="#D4AF37"; }}>
+            Explore Events
+          </a>
         </motion.div>
+      </div>
+
+      <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:3, duration:1 }} style={{ position:"absolute", bottom:"2rem", left:"50%", transform:"translateX(-50%)", zIndex:3, display:"flex", flexDirection:"column", alignItems:"center", gap:"0.4rem" }}>
+        <span style={{ fontFamily:"'Noto Serif JP', serif", fontSize:"0.65rem", letterSpacing:"0.3em", color:"rgba(255,255,255,0.4)", textTransform:"uppercase" }}>Scroll</span>
+        <motion.div animate={{ y:[0,8,0] }} transition={{ repeat:Infinity, duration:1.5, ease:"easeInOut" }} style={{ width:"1px", height:"40px", background:"linear-gradient(to bottom, rgba(212,175,55,0.8), transparent)" }} />
       </motion.div>
 
-      {/* Bottom gradient fade */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: '200px',
-        background: 'linear-gradient(to top, var(--void), transparent)',
-        zIndex: 5, pointerEvents: 'none'
-      }} />
     </section>
   );
 }
