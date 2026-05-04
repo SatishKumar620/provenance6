@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { gsap } from "gsap";
 
 const VIDEO_SRC = "/hero-video.mp4";
-const FALLBACK_BG = "/wp15625089-demon-slayer-kimetsu-no-yaiba-the-movie-infinity-castle-wallpapers.jpg";
+const FALLBACK_BG = "/castle.jpg";
 
 export default function Hero() {
   const lettersRef = useRef([]);
