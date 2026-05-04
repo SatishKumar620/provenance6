@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 const YOUTUBE_VIDEO_ID = "nAe82r8C9_4";
 
 // Infinity Castle background — shows until video loads
-const FALLBACK_BG = "https://images4.alphacoders.com/134/1347942.jpg";
+const FALLBACK_BG = "/wp15625089-demon-slayer-kimetsu-no-yaiba-the-movie-infinity-castle-wallpapers.jpg";
 
 export default function Hero() {
   const lettersRef = useRef([]);
